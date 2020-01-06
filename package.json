@@ -1,6 +1,6 @@
 {
   "name": "user-basic",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "description": "Basic User Functionality",
   "main": "index.js",
   "scripts": {
@@ -27,7 +27,7 @@
     "mysql-wrap-production": "git://github.com/tourmalinelabs/mysql-wrap-production.git#0.11.2",
     "nodemailer": "^6.4.2",
     "q": "^1.5.1",
-    "the_validator": "^1.8.2",
+    "the_validator": "git://github.com/tourmalinelabs/validator.git#1.9.0",
     "underscore": "^1.9.1"
   }
 }
