@@ -21,7 +21,7 @@
     "mocha": "^6.2.2"
   },
   "dependencies": {
-    "bcrypt": "^3.0.7",
+    "bcrypt": "^5.0.0",
     "jsonwebtoken": "^8.5.1",
     "mysql": "^2.17.1",
     "mysql-wrap-production": "git://github.com/tourmalinelabs/mysql-wrap-production.git#0.11.2",
