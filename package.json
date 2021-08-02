@@ -24,10 +24,10 @@
     "bcrypt": "^3.0.7",
     "jsonwebtoken": "^8.5.1",
     "mysql": "^2.17.1",
-    "mysql-wrap-production": "git+https://52516b5e70ebdb84dd3551640b78a038c0d297aa:x-oauth-basic@github.com/tourmalinelabs/mysql-wrap-production.git#0.11.2",
+    "mysql-wrap-production": "git://github.com/tourmalinelabs/mysql-wrap-production.git#0.11.2",
     "nodemailer": "^6.4.2",
     "q": "^1.5.1",
-    "the_validator": "git+https://52516b5e70ebdb84dd3551640b78a038c0d297aa:x-oauth-basic@github.com/tourmalinelabs/validator.git#1.9.0",
+    "the_validator": "git://github.com/tourmalinelabs/validator.git#1.9.0",
     "underscore": "^1.9.1"
   }
 }
