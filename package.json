@@ -2,9 +2,10 @@
   "name": "user-basic",
   "version": "0.3.0",
   "description": "Basic User Functionality",
-  "main": "index.js",
+  "main": "build/index.js",
   "scripts": {
-    "test": "npm test"
+    "test": "grunt test",
+    "build": "grunt build"
   },
   "repository": {
     "type": "git",
@@ -14,18 +15,31 @@
   "license": "MIT",
   "homepage": "https://github.com/tourmalinelabs/user-basic",
   "devDependencies": {
+    "@types/jest": "^26.0.24",
+    "@types/mocha": "^9.0.0",
+    "@types/node": "^16.4.13",
     "chai": "^4.3.4",
     "grunt": "^1.4.1",
+    "grunt-contrib-copy": "^1.0.0",
     "grunt-contrib-watch": "^1.1.0",
     "grunt-mocha-test": "^0.13.3",
-    "mocha": "^9.0.3"
+    "mocha": "^9.0.3",
+    "typescript": "^4.3.5"
   },
   "dependencies": {
+    "@typescript-eslint/eslint-plugin": "^4.29.0",
+    "@typescript-eslint/parser": "^4.29.0",
     "bcrypt": "^5.0.1",
+    "del": "^6.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "eslint-plugin-prettier": "^3.4.0",
+    "grunt-ts": "^6.0.0-beta.22",
     "jsonwebtoken": "^8.5.1",
     "mysql": "^2.18.1",
     "mysql-wrap-production": "git://github.com/tourmalinelabs/mysql-wrap-production.git#0.11.3",
     "nodemailer": "^6.6.3",
+    "prettier": "^2.3.2",
     "q": "^1.5.1",
     "the_validator": "git://github.com/tourmalinelabs/validator.git#1.10.0",
     "underscore": "^1.13.1"
