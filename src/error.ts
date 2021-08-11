@@ -15,7 +15,7 @@ ValidationError.prototype.toJSON = function () {
   return {
     code: this.code,
     message: this.message,
-    errors: this.errors
+    errors: this.errors,
   };
 };
 

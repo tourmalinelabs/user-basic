@@ -25,12 +25,16 @@ module.exports = function () {
         }
         return Q();
     };
-    self.setConfirmedByUsername = function (fig) { return setFieldByUsername(_.extend(_.clone(fig), {
-        field: 'isConfirmed'
-    })); };
-    self.setPasswordByUsername = function (fig) { return setFieldByUsername(_.extend(_.clone(fig), {
-        field: 'password'
-    })); };
+    self.setConfirmedByUsername = function (fig) {
+        return setFieldByUsername(_.extend(_.clone(fig), {
+            field: 'isConfirmed',
+        }));
+    };
+    self.setPasswordByUsername = function (fig) {
+        return setFieldByUsername(_.extend(_.clone(fig), {
+            field: 'password',
+        }));
+    };
     return self;
 };
 //# sourceMappingURL=data-model-memory.js.map

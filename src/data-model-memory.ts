@@ -5,7 +5,7 @@ const _ = require('underscore');
 const Q = require('q');
 
 module.exports = () => {
-  let self: any = {};
+  const self: any = {};
   let data = [];
 
   self.findByField = (field, value) => {
@@ -33,13 +33,19 @@ module.exports = () => {
     return Q();
   };
 
-  self.setConfirmedByUsername = fig => setFieldByUsername(_.extend(_.clone(fig), {
-    field: 'isConfirmed'
-  }));
+  self.setConfirmedByUsername = fig =>
+    setFieldByUsername(
+      _.extend(_.clone(fig), {
+        field: 'isConfirmed',
+      })
+    );
 
-  self.setPasswordByUsername = fig => setFieldByUsername(_.extend(_.clone(fig), {
-    field: 'password'
-  }));
+  self.setPasswordByUsername = fig =>
+    setFieldByUsername(
+      _.extend(_.clone(fig), {
+        field: 'password',
+      })
+    );
 
   return self;
 };

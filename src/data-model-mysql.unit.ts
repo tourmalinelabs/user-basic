@@ -2,12 +2,14 @@ export {};
 
 const _ = require('underscore');
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const Q = require('q');
 
 const chai = require('chai');
 
 const mysql = require('mysql');
 
+// eslint-disable-next-line @typescript-eslint/no-this-alias
 const self: any = this;
 
 const connection = mysql.createPool({

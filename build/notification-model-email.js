@@ -10,12 +10,16 @@ module.exports = function (fig) {
     var getToField = fig.getToField;
     var subjectTemplate = fig.subjectTemplate;
     var bodyTemplate = fig.bodyTemplate;
-    self.send = function (fig) { return Q.all([getToField(fig), subjectTemplate(fig), bodyTemplate(fig)]).then(function (resp) { return mail.send({
-        from: from,
-        to: resp[0],
-        subject: resp[1],
-        html: resp[2]
-    }); }); };
+    self.send = function (fig) {
+        return Q.all([getToField(fig), subjectTemplate(fig), bodyTemplate(fig)]).then(function (resp) {
+            return mail.send({
+                from: from,
+                to: resp[0],
+                subject: resp[1],
+                html: resp[2],
+            });
+        });
+    };
     return self;
 };
 //# sourceMappingURL=notification-model-email.js.map
