@@ -1,17 +1,13 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-var Q = require('q');
-var nodemailer = require('nodemailer');
-module.exports = function (fig) {
-    var transporter = nodemailer.createTransport(fig);
-    var self = {};
-    self.send = function (opt) {
-        return Q.Promise(function (resolve, reject) {
-            transporter.sendMail(opt, function (err, info) {
-                return err ? reject(err) : resolve(info);
-            });
-        });
-    };
+const Q = require('q');
+const nodemailer = require('nodemailer');
+module.exports = fig => {
+    const transporter = nodemailer.createTransport(fig);
+    const self = {};
+    self.send = opt => Q.Promise((resolve, reject) => {
+        transporter.sendMail(opt, (err, info) => err ? reject(err) : resolve(info));
+    });
     return self;
 };
 //# sourceMappingURL=mail.js.map

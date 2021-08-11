@@ -1,25 +1,25 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-var _ = require('underscore');
-var Q = require('q');
-var ValidationError = require('./error');
-var validate = require('./validate');
-var password = require('./password');
-var token = require('./token');
-module.exports = function (fig) {
-    var self = {};
-    var dataModel = fig.dataModel;
-    var confirmationModel = fig.confirmationModel;
-    var passwordResetModel = fig.passwordResetModel;
-    var tokenSecret = fig.tokenSecret;
-    var loginExpirationSeconds = fig.loginExpirationSeconds || 60 * 60;
-    var passwordResetExpirationSeconds = fig.passwordResetExpirationSeconds || 60 * 5;
-    var confirmationExpirationSeconds = fig.confirmationExpirationSeconds || 60 * 60 * 24;
-    var emailField = fig.emailField;
-    var usernameField = fig.usernameField || 'username';
-    var capitalize = function (string) { return string.charAt(0).toUpperCase() + string.slice(1); };
-    var schema = function () {
-        var s = {
+const _ = require('underscore');
+const Q = require('q');
+const ValidationError = require('./error');
+const validate = require('./validate');
+const password = require('./password');
+const token = require('./token');
+module.exports = fig => {
+    const self = {};
+    const dataModel = fig.dataModel;
+    const confirmationModel = fig.confirmationModel;
+    const passwordResetModel = fig.passwordResetModel;
+    const tokenSecret = fig.tokenSecret;
+    const loginExpirationSeconds = fig.loginExpirationSeconds || 60 * 60;
+    const passwordResetExpirationSeconds = fig.passwordResetExpirationSeconds || 60 * 5;
+    const confirmationExpirationSeconds = fig.confirmationExpirationSeconds || 60 * 60 * 24;
+    const emailField = fig.emailField;
+    const usernameField = fig.usernameField || 'username';
+    const capitalize = string => string.charAt(0).toUpperCase() + string.slice(1);
+    const schema = () => {
+        const s = {
             password: ['required', 'type:string'],
         };
         s[usernameField] = ['required', 'type:string'];
@@ -28,60 +28,46 @@ module.exports = function (fig) {
         }
         return s;
     };
-    self.register = function (fig) {
-        return validate(schema(), fig)
-            .then(function () { return dataModel.findByField(usernameField, fig.username); })
-            .then(function (userData) {
-            return userData &&
-                Q.reject(new ValidationError(400, {
-                    message: "The supplied " + usernameField + " has already been taken",
-                }));
-        })
-            .then(function () {
-            return emailField && emailField !== usernameField
-                ? dataModel.findByField(emailField, fig[emailField]).then(function (userData) {
-                    return userData &&
-                        Q.reject(new ValidationError(400, {
-                            message: 'The supplied ' + emailField + ' has already been taken',
-                        }));
-                })
-                : Q();
-        })
-            .then(function () { return password.hash(fig.password); })
-            .then(function (hashedPassword) {
-            return dataModel.insert(_.extend(_.clone(fig), {
-                password: hashedPassword,
-                isConfirmed: false,
-            }));
+    self.register = fig => validate(schema(), fig)
+        .then(() => dataModel.findByField(usernameField, fig.username))
+        .then(userData => userData &&
+        Q.reject(new ValidationError(400, {
+            message: `The supplied ${usernameField} has already been taken`,
+        })))
+        .then(() => emailField && emailField !== usernameField
+        ? dataModel.findByField(emailField, fig[emailField]).then(userData => userData &&
+            Q.reject(new ValidationError(400, {
+                message: 'The supplied ' + emailField + ' has already been taken',
+            })))
+        : Q())
+        .then(() => password.hash(fig.password))
+        .then(hashedPassword => dataModel.insert(_.extend(_.clone(fig), {
+        password: hashedPassword,
+        isConfirmed: false,
+    })));
+    self.login = fig => {
+        const loginError = new ValidationError(400, {
+            message: `Invalid ${usernameField} or password`,
         });
-    };
-    self.login = function (fig) {
-        var loginError = new ValidationError(400, {
-            message: "Invalid " + usernameField + " or password",
-        });
-        var validateFig = {
+        const validateFig = {
             password: ['required', 'type:string'],
         };
-        var usernameOrEmailField = emailField
-            ? usernameField + "Or" + capitalize(emailField)
+        const usernameOrEmailField = emailField
+            ? `${usernameField}Or${capitalize(emailField)}`
             : usernameField;
         validateFig[usernameOrEmailField] = ['required', 'type:string'];
         return validate(validateFig, fig)
-            .then(function () {
-            return dataModel.findByField(usernameField, fig[usernameOrEmailField]);
-        })
-            .then(function (userData) {
-            return !userData && emailField && emailField !== usernameField
-                ? dataModel.findByField(emailField, fig[usernameOrEmailField])
-                : userData;
-        })
-            .then(function (userData) { return userData || Q.reject(loginError); })
-            .then(function (userData) {
+            .then(() => dataModel.findByField(usernameField, fig[usernameOrEmailField]))
+            .then(userData => !userData && emailField && emailField !== usernameField
+            ? dataModel.findByField(emailField, fig[usernameOrEmailField])
+            : userData)
+            .then(userData => userData || Q.reject(loginError))
+            .then(userData => {
             return password
                 .compare(fig.password, userData.password)
-                .then(function (isMatch) { return isMatch || Q.reject(loginError); })
-                .then(function () {
-                var content = {
+                .then(isMatch => isMatch || Q.reject(loginError))
+                .then(() => {
+                const content = {
                     type: 'login',
                 };
                 content[usernameField] = userData[usernameField];
@@ -93,140 +79,112 @@ module.exports = function (fig) {
             });
         });
     };
-    self.validateLoginToken = function (tokenString) {
-        return token
-            .decode({
-            password: tokenSecret,
-            token: tokenString,
-        })
-            .then(function (decryptedToken) {
-            return decryptedToken.type === 'login'
-                ? decryptedToken
-                : Q.reject(new ValidationError(400, {
-                    message: 'Invalid type',
-                }));
-        });
-    };
-    self["findBy" + capitalize(usernameField)] = _.partial(dataModel.findByField, usernameField);
+    self.validateLoginToken = tokenString => token
+        .decode({
+        password: tokenSecret,
+        token: tokenString,
+    })
+        .then(decryptedToken => decryptedToken.type === 'login'
+        ? decryptedToken
+        : Q.reject(new ValidationError(400, {
+            message: 'Invalid type',
+        })));
+    self[`findBy${capitalize(usernameField)}`] = _.partial(dataModel.findByField, usernameField);
     if (emailField) {
-        self["findBy" + capitalize(emailField)] = _.partial(dataModel.findByField, emailField);
+        self[`findBy${capitalize(emailField)}`] = _.partial(dataModel.findByField, emailField);
     }
     if (passwordResetModel) {
-        self.sendPasswordReset = function (username) {
-            return dataModel
-                .findByField(usernameField, username)
-                .then(function (userData) {
-                return userData ||
-                    Q.reject(new ValidationError(400, {
-                        message: 'User not found',
-                    }));
-            })
-                .then(function (userData) {
-                var content = {
-                    type: 'password-reset',
-                };
-                content[usernameField] = userData[usernameField];
-                return token
-                    .create({
-                    password: tokenSecret,
-                    expiresInSeconds: passwordResetExpirationSeconds,
-                    content: content,
-                })
-                    .then(function (tokenData) {
-                    return passwordResetModel.send({
-                        token: tokenData,
-                        user: userData,
-                    });
-                });
-            });
-        };
-    }
-    self.resetPasswordWithToken = function (fig) {
-        return validate({
-            token: ['required', 'type:string'],
-            newPassword: ['required', 'type:string'],
-        }, fig)
-            .then(function () {
-            return token.decode({
+        self.sendPasswordReset = username => dataModel
+            .findByField(usernameField, username)
+            .then(userData => userData ||
+            Q.reject(new ValidationError(400, {
+                message: 'User not found',
+            })))
+            .then(userData => {
+            const content = {
+                type: 'password-reset',
+            };
+            content[usernameField] = userData[usernameField];
+            return token
+                .create({
                 password: tokenSecret,
-                token: fig.token,
-            });
-        })
-            .then(function (tokenData) {
-            return tokenData.type === 'password-reset'
-                ? tokenData[usernameField]
-                : Q.reject(new ValidationError(400, {
-                    message: 'Invalid type',
-                }));
-        })
-            .then(function (username) {
-            return password.hash(fig.newPassword).then(function (hashedPassword) {
-                var setFig = {
-                    password: hashedPassword,
-                };
-                setFig[usernameField] = username;
-                return dataModel["setPasswordBy" + capitalize(usernameField)](setFig);
-            });
+                expiresInSeconds: passwordResetExpirationSeconds,
+                content: content,
+            })
+                .then(tokenData => passwordResetModel.send({
+                token: tokenData,
+                user: userData,
+            }));
         });
-    };
-    if (confirmationModel) {
-        self.sendConfirmation = function (username) {
-            return dataModel
-                .findByField(usernameField, username)
-                .then(function (userData) {
-                return userData ||
-                    Q.reject(new ValidationError(400, {
-                        message: 'User not found',
-                    }));
-            })
-                .then(function (userData) {
-                return userData.isConfirmed
-                    ? Q.reject(new ValidationError(400, {
-                        message: 'User is already confirmed',
-                    }))
-                    : userData;
-            })
-                .then(function (userData) {
-                var content = {
-                    type: 'confirmation',
-                };
-                content[usernameField] = userData[usernameField];
-                return token
-                    .create({
-                    password: tokenSecret,
-                    expiresInSeconds: confirmationExpirationSeconds,
-                    content: content,
-                })
-                    .then(function (tokenData) {
-                    return confirmationModel.send({
-                        token: tokenData,
-                        user: userData,
-                    });
-                });
-            });
-        };
     }
-    self.confirmWithToken = function (confirmationToken) {
-        return token
-            .decode({
-            password: tokenSecret,
-            token: confirmationToken,
-        })
-            .then(function (tokenData) {
-            return tokenData.type === 'confirmation'
-                ? tokenData[usernameField]
-                : Q.reject(new ValidationError(400, {
-                    message: 'Invalid type',
-                }));
-        })
-            .then(function (username) {
-            var setFig = {
-                isConfirmed: true,
+    self.resetPasswordWithToken = fig => validate({
+        token: ['required', 'type:string'],
+        newPassword: ['required', 'type:string'],
+    }, fig)
+        .then(() => token.decode({
+        password: tokenSecret,
+        token: fig.token,
+    }))
+        .then(tokenData => tokenData.type === 'password-reset'
+        ? tokenData[usernameField]
+        : Q.reject(new ValidationError(400, {
+            message: 'Invalid type',
+        })))
+        .then(username => {
+        return password.hash(fig.newPassword).then(hashedPassword => {
+            const setFig = {
+                password: hashedPassword,
             };
             setFig[usernameField] = username;
-            return dataModel.setConfirmedByUsername(setFig);
+            return dataModel[`setPasswordBy${capitalize(usernameField)}`](setFig);
         });
-    };
+    });
+    if (confirmationModel) {
+        self.sendConfirmation = username => dataModel
+            .findByField(usernameField, username)
+            .then(userData => userData ||
+            Q.reject(new ValidationError(400, {
+                message: 'User not found',
+            })))
+            .then(userData => userData.isConfirmed
+            ? Q.reject(new ValidationError(400, {
+                message: 'User is already confirmed',
+            }))
+            : userData)
+            .then(userData => {
+            const content = {
+                type: 'confirmation',
+            };
+            content[usernameField] = userData[usernameField];
+            return token
+                .create({
+                password: tokenSecret,
+                expiresInSeconds: confirmationExpirationSeconds,
+                content: content,
+            })
+                .then(tokenData => confirmationModel.send({
+                token: tokenData,
+                user: userData,
+            }));
+        });
+    }
+    self.confirmWithToken = confirmationToken => token
+        .decode({
+        password: tokenSecret,
+        token: confirmationToken,
+    })
+        .then(tokenData => tokenData.type === 'confirmation'
+        ? tokenData[usernameField]
+        : Q.reject(new ValidationError(400, {
+            message: 'Invalid type',
+        })))
+        .then(username => {
+        const setFig = {
+            isConfirmed: true,
+        };
+        setFig[usernameField] = username;
+        return dataModel.setConfirmedByUsername(setFig);
+    });
     return self;
 };
 //# sourceMappingURL=model.js.map
