@@ -1,6 +1,6 @@
-'use strict';
-
-function ValidationError (code, fig) {
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+function ValidationError(code, fig) {
     fig = fig || {};
     this.message = fig.message || 'A server error occured';
     this.code = code;
@@ -13,8 +13,8 @@ ValidationError.prototype.toJSON = function () {
     return {
         code: this.code,
         message: this.message,
-        errors: this.errors
+        errors: this.errors,
     };
 };
-
 module.exports = ValidationError;
+//# sourceMappingURL=error.js.map
