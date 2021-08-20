@@ -37,11 +37,11 @@
     "grunt-ts": "^6.0.0-beta.22",
     "jsonwebtoken": "^8.5.1",
     "mysql": "^2.18.1",
-    "mysql-wrap-production": "git://github.com/tourmalinelabs/mysql-wrap-production.git#0.11.3-ts",
+    "mysql-wrap-production": "git://github.com/tourmalinelabs/mysql-wrap-production.git",
     "nodemailer": "^6.6.3",
     "prettier": "^2.3.2",
     "q": "^1.5.1",
-    "the_validator": "git://github.com/tourmalinelabs/validator.git#1.10.0-ts",
+    "the_validator": "git://github.com/tourmalinelabs/validator.git",
     "underscore": "^1.13.1"
   }
 }
