@@ -38,10 +38,10 @@
     "del": "^6.0.0",
     "jsonwebtoken": "^8.5.1",
     "mysql": "^2.18.1",
-    "mysql-wrap-production": "git://github.com/tourmalinelabs/mysql-wrap-production.git",
+    "mysql-wrap-production": "git://github.com/tourmalinelabs/mysql-wrap-production.git#master",
     "nodemailer": "^6.6.3",
     "q": "^1.5.1",
-    "the_validator": "git://github.com/tourmalinelabs/validator.git",
+    "the_validator": "git://github.com/tourmalinelabs/validator.git#master",
     "underscore": "^1.13.1"
   }
 }
