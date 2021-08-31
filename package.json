@@ -1,6 +1,6 @@
 {
   "name": "user-basic",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "Basic User Functionality",
   "main": "build/index.js",
   "scripts": {
@@ -38,10 +38,10 @@
     "del": "^6.0.0",
     "jsonwebtoken": "^8.5.1",
     "mysql": "^2.18.1",
-    "mysql-wrap-production": "git://github.com/tourmalinelabs/mysql-wrap-production.git#master",
+    "mysql-wrap-production": "git://github.com/tourmalinelabs/mysql-wrap-production.git#0.12.0",
     "nodemailer": "^6.6.3",
     "q": "^1.5.1",
-    "the_validator": "git://github.com/tourmalinelabs/validator.git#master",
+    "the_validator": "git://github.com/tourmalinelabs/validator.git#1.11.0",
     "underscore": "^1.13.1"
   }
 }
