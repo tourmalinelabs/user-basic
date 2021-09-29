@@ -1,5 +1,8 @@
-export {};
+const _exports: any = {};
 
-exports.model = require('./model');
-exports.dataModelMysql = require('./data-model-mysql');
-exports.notificationModelEMail = require('./notification-model-email');
+_exports.model = require('./model');
+_exports.dataModelMysql = require('./data-model-mysql');
+_exports.notificationModelEMail = require('./notification-model-email');
+
+module.exports = _exports;
+export default _exports;
