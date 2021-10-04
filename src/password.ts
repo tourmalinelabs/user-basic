@@ -1,17 +1,16 @@
-export {};
+import Q from 'q';
+import bcrypt from 'bcrypt';
 
-const Q = require('q');
+const _exports: any = {};
 
-const bcrypt = require('bcrypt');
-
-exports.compare = (plainText, hashed) =>
+_exports.compare = (plainText, hashed) =>
   Q.promise((resolve, reject) => {
     bcrypt.compare(plainText, hashed, (err, isValid) =>
       err ? reject(err) : resolve(isValid)
     );
   });
 
-exports.hash = password =>
+_exports.hash = password =>
   Q.promise((resolve, reject) => {
     bcrypt.genSalt(10, (err, salt) =>
       err
@@ -21,3 +20,6 @@ exports.hash = password =>
           )
     );
   });
+
+module.exports = _exports;
+export default _exports;
