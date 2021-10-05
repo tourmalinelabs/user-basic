@@ -1,5 +1,3 @@
-export {};
-
 function ValidationError(code, fig) {
   fig = fig || {};
   this.message = fig.message || 'A server error occured';
@@ -20,3 +18,4 @@ ValidationError.prototype.toJSON = function () {
 };
 
 module.exports = ValidationError;
+export default ValidationError;

@@ -1,209 +1,189 @@
-export {};
+import _ from "underscore";
+import Q from "q";
+import ValidationError from "./error";
+import validate from "./validate";
+import password from "./password";
+import token from "./token";
 
-const _ = require('underscore');
-
-const Q = require('q');
-
-const ValidationError = require('./error');
-
-const validate = require('./validate');
-
-const password = require('./password');
-
-const token = require('./token');
-
-module.exports = fig => {
+const fn = (fig) => {
   const self: any = {};
   const dataModel = fig.dataModel;
   const confirmationModel = fig.confirmationModel;
   const passwordResetModel = fig.passwordResetModel;
   const tokenSecret = fig.tokenSecret;
   const loginExpirationSeconds = fig.loginExpirationSeconds || 60 * 60;
-  const passwordResetExpirationSeconds =
-    fig.passwordResetExpirationSeconds || 60 * 5;
-  const confirmationExpirationSeconds =
-    fig.confirmationExpirationSeconds || 60 * 60 * 24;
+  const passwordResetExpirationSeconds = fig.passwordResetExpirationSeconds || 60 * 5;
+  const confirmationExpirationSeconds = fig.confirmationExpirationSeconds || 60 * 60 * 24;
   const emailField = fig.emailField;
-  const usernameField = fig.usernameField || 'username';
+  const usernameField = fig.usernameField || "username";
 
-  const capitalize = string => string.charAt(0).toUpperCase() + string.slice(1);
+  const capitalize = (string) => string.charAt(0).toUpperCase() + string.slice(1);
 
   const schema = () => {
     const s = {
-      password: ['required', 'type:string'],
+      password: ["required", "type:string"]
     };
-    s[usernameField] = ['required', 'type:string'];
+    s[usernameField] = ["required", "type:string"];
 
     if (emailField) {
-      s[emailField] = ['required', 'type:string', 'email'];
+      s[emailField] = ["required", "type:string", "email"];
     }
 
     return s;
   };
 
-  self.register = fig =>
+  self.register = (fig) =>
     validate(schema(), fig)
       .then(() => dataModel.findByField(usernameField, fig.username))
       .then(
-        userData =>
+        (userData) =>
           userData &&
           Q.reject(
             new ValidationError(400, {
-              message: `The supplied ${usernameField} has already been taken`,
+              message: `The supplied ${usernameField} has already been taken`
             })
           )
       )
       .then(() =>
         emailField && emailField !== usernameField
           ? dataModel.findByField(emailField, fig[emailField]).then(
-              userData =>
+              (userData) =>
                 userData &&
                 Q.reject(
                   new ValidationError(400, {
-                    message:
-                      'The supplied ' + emailField + ' has already been taken',
+                    message: "The supplied " + emailField + " has already been taken"
                   })
                 )
             )
           : Q()
       )
       .then(() => password.hash(fig.password))
-      .then(hashedPassword =>
+      .then((hashedPassword) =>
         dataModel.insert(
           _.extend(_.clone(fig), {
             password: hashedPassword,
-            isConfirmed: false,
+            isConfirmed: false
           })
         )
       );
 
-  self.login = fig => {
+  self.login = (fig) => {
     const loginError = new ValidationError(400, {
-      message: `Invalid ${usernameField} or password`,
+      message: `Invalid ${usernameField} or password`
     });
     const validateFig = {
-      password: ['required', 'type:string'],
+      password: ["required", "type:string"]
     };
-    const usernameOrEmailField = emailField
-      ? `${usernameField}Or${capitalize(emailField)}`
-      : usernameField;
-    validateFig[usernameOrEmailField] = ['required', 'type:string'];
+    const usernameOrEmailField = emailField ? `${usernameField}Or${capitalize(emailField)}` : usernameField;
+    validateFig[usernameOrEmailField] = ["required", "type:string"];
     return validate(validateFig, fig)
-      .then(() =>
-        dataModel.findByField(usernameField, fig[usernameOrEmailField])
-      )
-      .then(userData =>
+      .then(() => dataModel.findByField(usernameField, fig[usernameOrEmailField]))
+      .then((userData) =>
         !userData && emailField && emailField !== usernameField
           ? dataModel.findByField(emailField, fig[usernameOrEmailField])
           : userData
       )
-      .then(userData => userData || Q.reject(loginError))
-      .then(userData => {
+      .then((userData) => userData || Q.reject(loginError))
+      .then((userData) => {
         return password
           .compare(fig.password, userData.password)
-          .then(isMatch => isMatch || Q.reject(loginError))
+          .then((isMatch) => isMatch || Q.reject(loginError))
           .then(() => {
             const content = {
-              type: 'login',
+              type: "login"
             };
             content[usernameField] = userData[usernameField];
             return token.create({
               password: tokenSecret,
               expiresInSeconds: loginExpirationSeconds,
-              content: content,
+              content: content
             });
           });
       });
   };
 
-  self.validateLoginToken = tokenString =>
+  self.validateLoginToken = (tokenString) =>
     token
       .decode({
         password: tokenSecret,
-        token: tokenString,
+        token: tokenString
       })
-      .then(decryptedToken =>
-        decryptedToken.type === 'login'
+      .then((decryptedToken) =>
+        decryptedToken.type === "login"
           ? decryptedToken
           : Q.reject(
               new ValidationError(400, {
-                message: 'Invalid type',
+                message: "Invalid type"
               })
             )
       );
 
-  self[`findBy${capitalize(usernameField)}`] = _.partial(
-    dataModel.findByField,
-    usernameField
-  );
+  self[`findBy${capitalize(usernameField)}`] = _.partial(dataModel.findByField, usernameField);
 
   if (emailField) {
-    self[`findBy${capitalize(emailField)}`] = _.partial(
-      dataModel.findByField,
-      emailField
-    );
+    self[`findBy${capitalize(emailField)}`] = _.partial(dataModel.findByField, emailField);
   }
 
   if (passwordResetModel) {
-    self.sendPasswordReset = username =>
+    self.sendPasswordReset = (username) =>
       dataModel
         .findByField(usernameField, username)
         .then(
-          userData =>
+          (userData) =>
             userData ||
             Q.reject(
               new ValidationError(400, {
-                message: 'User not found',
+                message: "User not found"
               })
             )
         )
-        .then(userData => {
+        .then((userData) => {
           const content = {
-            type: 'password-reset',
+            type: "password-reset"
           };
           content[usernameField] = userData[usernameField];
           return token
             .create({
               password: tokenSecret,
               expiresInSeconds: passwordResetExpirationSeconds,
-              content: content,
+              content: content
             })
-            .then(tokenData =>
+            .then((tokenData) =>
               passwordResetModel.send({
                 token: tokenData,
-                user: userData,
+                user: userData
               })
             );
         });
   }
 
-  self.resetPasswordWithToken = fig =>
+  self.resetPasswordWithToken = (fig) =>
     validate(
       {
-        token: ['required', 'type:string'],
-        newPassword: ['required', 'type:string'],
+        token: ["required", "type:string"],
+        newPassword: ["required", "type:string"]
       },
       fig
     )
       .then(() =>
         token.decode({
           password: tokenSecret,
-          token: fig.token,
+          token: fig.token
         })
       )
-      .then(tokenData =>
-        tokenData.type === 'password-reset'
+      .then((tokenData) =>
+        tokenData.type === "password-reset"
           ? tokenData[usernameField]
           : Q.reject(
               new ValidationError(400, {
-                message: 'Invalid type',
+                message: "Invalid type"
               })
             )
       )
-      .then(username => {
-        return password.hash(fig.newPassword).then(hashedPassword => {
+      .then((username) => {
+        return password.hash(fig.newPassword).then((hashedPassword) => {
           const setFig = {
-            password: hashedPassword,
+            password: hashedPassword
           };
           setFig[usernameField] = username;
           return dataModel[`setPasswordBy${capitalize(usernameField)}`](setFig);
@@ -211,65 +191,65 @@ module.exports = fig => {
       });
 
   if (confirmationModel) {
-    self.sendConfirmation = username =>
+    self.sendConfirmation = (username) =>
       dataModel
         .findByField(usernameField, username)
         .then(
-          userData =>
+          (userData) =>
             userData ||
             Q.reject(
               new ValidationError(400, {
-                message: 'User not found',
+                message: "User not found"
               })
             )
         )
-        .then(userData =>
+        .then((userData) =>
           userData.isConfirmed
             ? Q.reject(
                 new ValidationError(400, {
-                  message: 'User is already confirmed',
+                  message: "User is already confirmed"
                 })
               )
             : userData
         )
-        .then(userData => {
+        .then((userData) => {
           const content = {
-            type: 'confirmation',
+            type: "confirmation"
           };
           content[usernameField] = userData[usernameField];
           return token
             .create({
               password: tokenSecret,
               expiresInSeconds: confirmationExpirationSeconds,
-              content: content,
+              content: content
             })
-            .then(tokenData =>
+            .then((tokenData) =>
               confirmationModel.send({
                 token: tokenData,
-                user: userData,
+                user: userData
               })
             );
         });
   }
 
-  self.confirmWithToken = confirmationToken =>
+  self.confirmWithToken = (confirmationToken) =>
     token
       .decode({
         password: tokenSecret,
-        token: confirmationToken,
+        token: confirmationToken
       })
-      .then(tokenData =>
-        tokenData.type === 'confirmation'
+      .then((tokenData) =>
+        tokenData.type === "confirmation"
           ? tokenData[usernameField]
           : Q.reject(
               new ValidationError(400, {
-                message: 'Invalid type',
+                message: "Invalid type"
               })
             )
       )
-      .then(username => {
+      .then((username) => {
         const setFig = {
-          isConfirmed: true,
+          isConfirmed: true
         };
         setFig[usernameField] = username;
         return dataModel.setConfirmedByUsername(setFig);
@@ -277,3 +257,6 @@ module.exports = fig => {
 
   return self;
 };
+
+module.exports = fn;
+export default fn;

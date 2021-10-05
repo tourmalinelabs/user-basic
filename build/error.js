@@ -17,4 +17,5 @@ ValidationError.prototype.toJSON = function () {
     };
 };
 module.exports = ValidationError;
+exports.default = ValidationError;
 //# sourceMappingURL=error.js.map

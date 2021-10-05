@@ -1,14 +1,9 @@
-export {};
+import _ from 'underscore';
+import Q from 'q';
+import Validator from 'the_validator';
+import ValidationError from './error';
 
-const _ = require('underscore');
-
-const Q = require('q');
-
-const Validator = require('the_validator');
-
-const ValidationError = require('./error');
-
-module.exports = (rules, data) => {
+const fn = (rules, data) => {
   const errors = new Validator(rules, {
     strict: false,
   }).test(data);
@@ -21,3 +16,6 @@ module.exports = (rules, data) => {
         })
       );
 };
+
+module.exports = fn;
+export default fn;
