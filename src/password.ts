@@ -1,5 +1,5 @@
 import Q from 'q';
-import bcrypt from 'bcrypt';
+import bcrypt from 'bcryptjs';
 
 const _exports: any = {};
 
